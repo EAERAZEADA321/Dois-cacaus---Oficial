@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprar | Dois Cacaus</title>
+    <style>
+        /* ================= VARIÁVEIS E RESET ================= */
+        :root {
+            --bg-color: #F8F5F0;
+            --text-dark: #3E2723;
+            --accent-brown: #5D4037;
+            --card-bg: #EAE3D9;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-dark); overflow-x: hidden; padding-top: 80px; }
+        a { text-decoration: none; color: inherit; }
+
+        /* ================= NAVEGAÇÃO ================= */
+        header.navbar {
+            position: fixed; width: 100%; top: 0; left: 0; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%; background: rgba(248, 245, 240, 0.95);
+            backdrop-filter: blur(10px); box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-size: 1.8rem; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .logo img {width: 100%; height: 30px; transform: scale(5.5);}
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a:hover { color: #8D6E63; }
+
+        /* ================= PRODUTO PRINCIPAL ================= */
+        .product-section {
+            display: flex; flex-wrap: wrap; gap: 4rem; padding: 4rem 5%;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .product-image-container {
+            flex: 1; min-width: 300px; cursor: zoom-in;
+            overflow: hidden; border-radius: 15px;
+        }
+        .product-image-container img {
+            width: 100%; height: auto; border-radius: 15px;
+            transition: transform 0.5s ease;
+        }
+        .product-image-container:hover img { transform: scale(1.05); }
+        
+        .product-details { flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: center; }
+        .product-details h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .product-details p.description { line-height: 1.6; margin-bottom: 2rem; color: #555; }
+        
+        .price-calculator { background: var(--card-bg); padding: 2rem; border-radius: 15px; }
+        .price-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+        .base-price { font-size: 1.2rem; color: #666; }
+        .total-price { font-size: 2rem; font-weight: bold; color: var(--text-dark); }
+        
+        .quantity-selector { display: flex; align-items: center; gap: 10px; }
+        .quantity-selector button {
+            width: 35px; height: 35px; border-radius: 50%; border: none;
+            background: var(--text-dark); color: white; font-size: 1.2rem; cursor: pointer;
+        }
+        .quantity-selector input {
+            width: 50px; text-align: center; font-size: 1.2rem; border: 1px solid #ccc;
+            border-radius: 5px; padding: 5px; background: transparent;
+        }
+
+        .buy-btn {
+            width: 100%; padding: 1rem; background: var(--text-dark); color: white;
+            border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold;
+            cursor: pointer; transition: var(--transition);
+        }
+        .buy-btn:hover { background: var(--accent-brown); transform: translateY(-2px); }
+
+        /* ================= LIGHTBOX (TELA CHEIA) ================= */
+        .lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .lightbox.active { opacity: 1; pointer-events: all; cursor: zoom-out; }
+        .lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; transform: scale(0.8); transition: transform 0.4s ease; }
+        .lightbox.active img { transform: scale(1); }
+
+        /* ================= AVALIAÇÕES ================= */
+        .comments-section { max-width: 1200px; margin: 0 auto; padding: 2rem 5%; }
+        .comments-section h2 { margin-bottom: 2rem; border-bottom: 2px solid var(--card-bg); padding-bottom: 0.5rem; }
+        
+        .comment-form { background: var(--card-bg); padding: 2rem; border-radius: 15px; margin-bottom: 3rem; }
+        .star-rating { display: flex; gap: 5px; margin-bottom: 1rem; font-size: 1.5rem; cursor: pointer; color: #ccc; }
+        .star-rating .star:hover, .star-rating .star.active { color: #FFD700; }
+        
+        .comment-form textarea {
+            width: 100%; height: 100px; padding: 1rem; border-radius: 8px;
+            border: 1px solid #ccc; background: transparent; margin-bottom: 1rem; resize: none;
+        }
+        .comment-form button { padding: 0.8rem 2rem; background: var(--text-dark); color: white; border: none; border-radius: 8px; cursor: pointer; }
+        
+        .comment-list { display: flex; flex-direction: column; gap: 1.5rem; }
+        .comment { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .comment-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .comment-stars { color: #FFD700; }
+
+        /* ================= GALERIA COM ANIMAÇÃO ================= */
+        .gallery-section { max-width: 1200px; margin: 4rem auto; padding: 0 5%; }
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;
+        }
+        .gallery-item {
+            opacity: 0; transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .gallery-item.show { opacity: 1; transform: translateY(0); }
+        .gallery-item img { width: 100%; height: 250px; object-fit: cover; border-radius: 15px; }
+
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo"><img src="../imagem/logo.png" alt="Logo"></div>
+        <nav class="nav-links">
+            <a href="../../index.html">Início</a>
+            <a href="comprar.html">Comprar</a>
+            <a href="pagamento.html">Formas de Pagamento</a>
+        </nav>
+    </header>
+
+    <section class="product-section">
+        <div class="product-image-container" id="open-lightbox">
+            <img src="../imagem/brigadeiros/Ninho.png" alt="Combo Trufado Dois Cacaus" id="main-product-img">
+        </div>
+        <div class="product-details">
+            <h1>Ninho com Nutella</h1>
+            <p class="description">Brigadeiro feito de ninho com nutella, tendo aproximadamente 20g cada brigadeiro.</p>
+            
+            <div class="price-calculator">
+                <div class="price-row">
+                    <span class="base-price">Preço unitário: R$ 2,50</span>
+                </div>
+                <div class="price-row">
+                    <div class="quantity-selector">
+                        <button id="btn-minus">-</button>
+                        <input type="number" id="qtd-input" value="1" min="1" readonly>
+                        <button id="btn-plus">+</button>
+                    </div>
+                    <span class="total-price" id="total-display">R$ 2,50</span>
+                </div>
+                <button class="buy-btn" onclick="window.location.href='encomendar.html'">Finalizar Bandeja</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="comments-section">
+        <h2>Avaliações dos Clientes</h2>
+        
+        <div class="comment-form">
+            <h3>Deixe sua avaliação</h3>
+            <div class="star-rating" id="star-rating">
+                <span class="star" data-value="1">★</span>
+                <span class="star" data-value="2">★</span>
+                <span class="star" data-value="3">★</span>
+                <span class="star" data-value="4">★</span>
+                <span class="star" data-value="5">★</span>
+            </div>
+            <textarea id="comment-text" placeholder="Escreva o que achou do nosso produto..."></textarea>
+            <button id="submit-comment">Enviar Avaliação</button>
+        </div>
+
+        <div class="comment-list" id="comment-list">
+            <div class="comment">
+                <div class="comment-header">
+                    <strong>Maria S.</strong>
+                    <span class="comment-stars">★★★★★</span>
+                </div>
+                <p>Simplesmente maravilhoso! O chocolate derrete na boca. Com certeza comprarei de novo.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="gallery-section">
+        <h2 style="margin-bottom: 2rem;">Veja mais detalhes</h2>
+        <div class="gallery-grid">
+            <div class="gallery-item anim-scroll">
+                <img src="https://images.unsplash.com/photo-1548883354-94cb1999e52d?q=80&w=400" alt="Detalhe 1">
+            </div>
+            <div class="gallery-item anim-scroll">
+                <img src="https://images.unsplash.com/photo-1614088921876-068305007328?q=80&w=400" alt="Detalhe 2">
+            </div>
+            <div class="gallery-item anim-scroll">
+                <img src="https://images.unsplash.com/photo-1511381939415-e440c9f18aa4?q=80&w=400" alt="Detalhe 3">
+            </div>
+        </div>
+    </section>
+
+    <div class="lightbox" id="lightbox">
+        <img src="" id="lightbox-img" alt="Zoom Imagem">
+    </div>
+
+    <script>
+        /* --- 1. Lógica do Multiplicador de Preço --- */
+        const basePrice = 2.50;
+        let currentQuantity = 1;
+        const qtdInput = document.getElementById('qtd-input');
+        const totalDisplay = document.getElementById('total-display');
+        const btnMinus = document.getElementById('btn-minus');
+        const btnPlus = document.getElementById('btn-plus');
+
+        function updateTotal() {
+            const total = basePrice * currentQuantity;
+            // Formata para padrão brasileiro (ex: R$ 89,90)
+            totalDisplay.innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            qtdInput.value = currentQuantity;
+        }
+
+        btnPlus.addEventListener('click', () => {
+            currentQuantity++;
+            updateTotal();
+        });
+
+        btnMinus.addEventListener('click', () => {
+            if (currentQuantity > 1) {
+                currentQuantity--;
+                updateTotal();
+            }
+        });
+
+        /* --- 2. Lógica do Lightbox (Imagem em tela cheia) --- */
+        const openLightbox = document.getElementById('open-lightbox');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const mainImgSrc = document.getElementById('main-product-img').src;
+
+        openLightbox.addEventListener('click', () => {
+            lightboxImg.src = mainImgSrc;
+            lightbox.classList.add('active');
+        });
+
+        lightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+
+        /* --- 3. Lógica das Estrelas e Inserção de Comentário --- */
+        const stars = document.querySelectorAll('.star');
+        let selectedStars = 0;
+
+        // Efeito de passar o mouse nas estrelas
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                const value = this.getAttribute('data-value');
+                highlightStars(value);
+            });
+            
+            star.addEventListener('mouseout', function() {
+                highlightStars(selectedStars);
+            });
+            
+            star.addEventListener('click', function() {
+                selectedStars = this.getAttribute('data-value');
+                highlightStars(selectedStars);
+            });
+        });
+
+        function highlightStars(count) {
+            stars.forEach(star => {
+                if (star.getAttribute('data-value') <= count) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Enviar Comentário
+        const submitBtn = document.getElementById('submit-comment');
+        const commentText = document.getElementById('comment-text');
+        const commentList = document.getElementById('comment-list');
+
+        submitBtn.addEventListener('click', () => {
+            if (commentText.value.trim() === '' || selectedStars === 0) {
+                alert('Por favor, selecione uma nota e escreva um comentário.');
+                return;
+            }
+
+            // Cria os elementos do novo comentário
+            const newComment = document.createElement('div');
+            newComment.classList.add('comment');
+            
+            let starsHtml = '★'.repeat(selectedStars) + '☆'.repeat(5 - selectedStars);
+
+            newComment.innerHTML = `
+                <div class="comment-header">
+                    <strong>Novo Cliente</strong>
+                    <span class="comment-stars">${starsHtml}</span>
+                </div>
+                <p>${commentText.value}</p>
+            `;
+
+            // Adiciona no topo da lista
+            commentList.prepend(newComment);
+            
+            // Limpa o formulário
+            commentText.value = '';
+            selectedStars = 0;
+            highlightStars(0);
+        });
+
+        /* --- 4. Animação Suave ao Rolar para Baixo (Intersection Observer) --- */
+        const animItems = document.querySelectorAll('.anim-scroll');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        }, { threshold: 0.2 }); // Dispara quando 20% do item estiver visível na tela
+
+        animItems.forEach(item => {
+            observer.observe(item);
+        });
+    </script>
+</body>
+</html>
