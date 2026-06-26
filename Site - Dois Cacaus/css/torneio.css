@@ -1,0 +1,115 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: #000033;
+    background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.5));
+    font-family: 'Courier New', Courier, monospace;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.bracket-container {
+    display: flex;
+    width: 100%;
+    max-width: 1600px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.side {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 900px; /* Altura fixa para alinhar os jogos */
+}
+
+/* Estilo dos Blocos de Jogos */
+.match {
+    background: rgba(0, 255, 255, 0.2);
+    border: 2px solid aqua;
+    border-radius: 8px;
+    width: 180px;
+    padding: 5px;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+}
+
+.team {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: aqua;
+    color: black;
+    margin: 3px 0;
+    padding: 5px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 12px;
+}
+.team select{
+    background-color: transparent;
+    width: 70%;
+}
+
+.team input {
+    width: 35px;
+    border: 1px solid #333;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Centralização da Final */
+.center-final {
+    text-align: center;
+    flex: 1;
+    padding: 0 20px;
+}
+
+.center-final h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 15px aqua;
+}
+
+.match.final {
+    width: 300px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.1);
+    border: 3px solid gold;
+    padding: 20px;
+}
+
+.team-final {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.team-final input {
+    width: 60px;
+    height: 40px;
+    font-size: 20px;
+    text-align: center;
+}
+
+.vs {
+    margin: 15px 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: gold;
+}
+
+/* Responsividade */
+@media (max-width: 1400px) {
+    .bracket-container { zoom: 0.7; }
+}

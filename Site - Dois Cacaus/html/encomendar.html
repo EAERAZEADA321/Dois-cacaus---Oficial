@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monte sua Bandeja | Dois Cacaus</title>
+    <style>
+        /* ================= VARIÁVEIS E RESET ================= */
+        :root {
+            --bg-color: #F8F5F0;
+            --text-dark: #3E2723;
+            --accent-brown: #5D4037;
+            --card-bg: #EAE3D9;
+            --white: #ffffff;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-dark); padding: 4rem 5% 2rem 5%; min-height: 100vh; }
+
+        header { text-align: center; margin-bottom: 3rem; }
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        header p { color: var(--accent-brown); font-size: 1.1rem; }
+
+        header.navbar {
+            position: fixed; width: 100%; top: 0; left: 0; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%; background: rgba(248, 245, 240, 0.95);
+            backdrop-filter: blur(10px); box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .logo img {width: 100%; height: 30px; transform: scale(5.5);}
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { font-weight: 500; position: relative; text-decoration: none; color: black; }
+        .nav-links a:hover { color: #8D6E63; }
+        .nav-icons { display: flex; gap: 1rem; align-items: center; font-size: 1.2rem; }
+        .cart-icon-container { position: relative; cursor: pointer; }
+        .cart-badge {
+            position: absolute; top: -8px; right: -8px; background: var(--text-dark);
+            color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem;
+        }
+        
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        /* ================= SEÇÃO DE SABORES ================= */
+        .flavors-section h2 { margin-bottom: 1.5rem; font-size: 1.6rem; border-bottom: 2px solid var(--card-bg); padding-bottom: 0.5rem; }
+        .flavors-grid { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .flavor-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+        .flavor-card:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.05); border-color: var(--card-bg); }
+        
+        .flavor-info { display: flex; align-items: center; gap: 1rem; }
+        .flavor-img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; background: #D7CCC8; }
+        .flavor-text h3 { font-size: 1.1rem; margin-bottom: 0.2rem; }
+        .flavor-text p { font-size: 0.85rem; color: #777; }
+
+        .flavor-actions { display: flex; align-items: center; gap: 10px; }
+        .tray-select {
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid #C4B9AC;
+            background: var(--bg-color);
+            color: var(--text-dark);
+            font-weight: 500;
+            outline: none;
+        }
+        .add-btn {
+            background: var(--text-dark);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+        .add-btn:hover { background: var(--accent-brown); }
+
+        /* ================= SEÇÃO DAS BANDEJAS ================= */
+        .trays-section h2 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 1.6rem; border-bottom: 2px solid var(--card-bg); padding-bottom: 0.5rem; }
+        
+        .add-tray-btn {
+            background: transparent;
+            color: var(--accent-brown);
+            border: 2px dashed var(--accent-brown);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .add-tray-btn:hover { background: var(--accent-brown); color: var(--white); }
+
+        .trays-list { display: flex; flex-direction: column; gap: 1.5rem; }
+        
+        .tray-box {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 1.5rem;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .tray-box-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1rem; font-weight: bold; font-size: 1.1rem;
+        }
+        .remove-tray-link { color: #cc0000; font-size: 0.85rem; cursor: pointer; text-decoration: underline; }
+        
+        /* Slots visuais de bombons/doces */
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .slot {
+            height: 70px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px dashed #C4B9AC;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px;
+            position: relative;
+            transition: var(--transition);
+        }
+        .slot.filled {
+            background: var(--white);
+            border: 1px solid #C4B9AC;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .remove-item-btn {
+            position: absolute; top: -5px; right: -5px;
+            background: #cc0000; color: white; border: none;
+            width: 18px; height: 18px; border-radius: 50%;
+            font-size: 10px; cursor: pointer; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ================= FOOTER / FINALIZAÇÃO ================= */
+        .footer-actions {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--card-bg);
+        }
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: var(--white);
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 10px;
+        }
+        .whatsapp-btn:hover { background-color: #128C7E; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5); }
+
+        /* Responsividade */
+        @media (max-width: 850px) {
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo"><img src="../imagem/logo.png" alt="Logo"></div>
+        <nav class="nav-links">
+            <a href="../../index.html">Início</a>
+            <a href="#">Produtos</a>
+            <a href="../../index.html">Nosso Cacau</a>
+        </nav>
+    </header>
+    <header>
+        <h1>Monte Sua Bandeja Personalizada</h1>
+        <p>Escolha seus sabores favoritos e organize suas bandejas como preferir (máx. 4 doces por bandeja)</p>
+    </header>
+
+    <main class="container">
+        <section class="flavors-section">
+            <h2>1. Escolha os Sabores</h2>
+            <div class="flavors-grid" id="flavors-list">
+                </div>
+        </section>
+
+        <section class="trays-section">
+            <h2>
+                2. Suas Bandejas 
+                <button class="add-tray-btn" onclick="addTray()">+ Nova Bandeja</button>
+            </h2>
+            <div class="trays-list" id="trays-display">
+                </div>
+        </section>
+
+        <div class="footer-actions">
+            <button class="whatsapp-btn" onclick="sendWhatsAppOrder()">
+                <span>🟢</span> Encomendar e Finalizar pelo WhatsApp
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // ================= CONFIGURAÇÃO DE DADOS =================
+        const flavorOptions = [
+            { id: 'f1', name: 'Ferreiro Rocher', desc: 'Sabor marcante e pedaços crocantes', img: '../imagem/brigadeiros/Ferreiro roche.png' },
+            { id: 'f2', name: 'M&M', desc: 'Simples e gostoso', img: '../imagem/brigadeiros/M&M2.png' },
+            { id: 'f3', name: 'Bixo de Pé', desc: 'Sabor de infancia', img: '../imagem/brigadeiros/bixo de pe.png' },
+            { id: 'f4', name: 'Ninho com nutela', desc: 'Intenso e sofisticado', img: '../imagem/brigadeiros/Ninho.png' },
+            { id: 'f5', name: 'Maracujá', desc: 'Azedinho cremoso', img: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?q=80&w=150' }
+        ];
+
+        // Estado inicial do app: começa com 1 bandeja vazia
+        let trays = [
+            { id: 1, items: [] }
+        ];
+        let trayCounter = 1;
+
+        // ================= INICIALIZAÇÃO / RENDERERS =================
+
+        // Renderiza os 5 sabores fixos na tela
+        function renderFlavors() {
+            const flavorsContainer = document.getElementById('flavors-list');
+            flavorsContainer.innerHTML = '';
+
+            flavorOptions.forEach(flavor => {
+                // Cria as opções do select de bandejas baseado no estado atual de 'trays'
+                let selectOptions = trays.map(t => `<option value="${t.id}">Bandeja ${t.id}</option>`).join('');
+
+                const cardHTML = `
+                    <div class="flavor-card">
+                        <div class="flavor-info">
+                            <img src="${flavor.img}" class="flavor-img" alt="${flavor.name}">
+                            <div class="flavor-text">
+                                <h3>${flavor.name}</h3>
+                                <p>${flavor.desc}</p>
+                            </div>
+                        </div>
+                        <div class="flavor-actions">
+                            <select class="tray-select" id="select-for-${flavor.id}">
+                                ${selectOptions}
+                            </select>
+                            <button class="add-btn" onclick="addItemToTray('${flavor.id}')">Adicionar</button>
+                        </div>
+                    </div>
+                `;
+                flavorsContainer.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        // Renderiza visualmente as bandejas e seus respectivos slots (máx 4 por bandeja)
+        function renderTrays() {
+            const traysContainer = document.getElementById('trays-display');
+            traysContainer.innerHTML = '';
+
+            trays.forEach((tray, trayIndex) => {
+                let slotsHTML = '';
+                
+                // Criar sempre 4 slots fixos por bandeja
+                for (let i = 0; i < 4; i++) {
+                    if (tray.items[i]) {
+                        // Slot Preenchido
+                        slotsHTML += `
+                            <div class="slot filled">
+                                <button class="remove-item-btn" onclick="removeItemFromTray(${tray.id}, ${i})">✕</button>
+                                <span>${tray.items[i]}</span>
+                            </div>
+                        `;
+                    } else {
+                        // Slot Vazio
+                        slotsHTML += `
+                            <div class="slot">
+                                <span style="color:#A39585; font-size: 1.2rem;">+</span>
+                                <span style="color:#A39585; font-size: 0.65rem;">Vazio</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Opção de remover bandeja caso exista mais de uma
+                let removeTrayHTML = trays.length > 1 ? `<span class="remove-tray-link" onclick="removeTray(${tray.id})">Remover Bandeja</span>` : '';
+
+                const trayHTML = `
+                    <div class="tray-box">
+                        <div class="tray-box-header">
+                            <span>Bandeja ${tray.id} (${tray.items.length}/4)</span>
+                            ${removeTrayHTML}
+                        </div>
+                        <div class="slots-grid">
+                            ${slotsHTML}
+                        </div>
+                    </div>
+                `;
+                traysContainer.insertAdjacentHTML('beforeend', trayHTML);
+            });
+        }
+
+        // Atualiza a interface completa
+        function updateUI() {
+            renderTrays();
+            renderFlavors(); // Re-renderiza sabores para atualizar as opções de dropdown
+        }
+
+        // ================= LÓGICA DE AÇÕES =================
+
+        // Adiciona uma nova bandeja vazia (Aumenta o limite total em +4 slots)
+        function addTray() {
+            trayCounter++;
+            trays.push({ id: trayCounter, items: [] });
+            updateUI();
+        }
+
+        // Remove uma bandeja específica
+        function removeTray(trayId) {
+            trays = trays.filter(t => t.id !== trayId);
+            updateUI();
+        }
+
+        // Adiciona o sabor clicado na bandeja selecionada no respectivo dropdown
+        function addItemToTray(flavorId) {
+            const selectElement = document.getElementById(`select-for-${flavorId}`);
+            const selectedTrayId = parseInt(selectElement.value);
+            const flavor = flavorOptions.find(f => f.id === flavorId);
+
+            // Encontra a bandeja correta no array
+            const targetTray = trays.find(t => t.id === selectedTrayId);
+
+            if (targetTray) {
+                // Validação do limite estrito de 4 itens por bandeja
+                if (targetTray.items.length >= 4) {
+                    alert(`A Bandeja ${selectedTrayId} já está cheia! Adicione outra bandeja ou remova um item.`);
+                    return;
+                }
+                
+                // Adiciona o nome do sabor à lista de itens daquela bandeja
+                targetTray.items.push(flavor.name);
+                updateUI();
+            }
+        }
+
+        // Remove um item específico de uma bandeja clicando no "X" do slot
+        function removeItemFromTray(trayId, itemIndex) {
+            const targetTray = trays.find(t => t.id === trayId);
+            if (targetTray) {
+                targetTray.items.splice(itemIndex, 1);
+                updateUI();
+            }
+        }
+
+        // ================= INTEGRAÇÃO WHATSAPP =================
+        function sendWhatsAppOrder() {
+            // Verificar se há pelo menos um item adicionado em qualquer bandeja
+            const totalItems = trays.reduce((acc, t) => acc + t.items.length, 0);
+            if (totalItems === 0) {
+                alert("Seu carrinho está vazio! Adicione pelo menos um sabor em alguma bandeja.");
+                return;
+            }
+
+            // Número fictício do WhatsApp da loja (Substitua pelo seu número DDD + Número completo)
+            const phoneNumber = "554591028227"; 
+            
+            // Montagem do texto personalizado
+            let message = "🍫 *Olá, Dois Cacaus! Gostaria de fazer uma encomenda personalizada:*\n\n";
+            
+            trays.forEach(tray => {
+                if(tray.items.length > 0) {
+                    message += `📦 *Bandeja ${tray.id}:*\n`;
+                    
+                    // Agrupa itens repetidos na mesma bandeja para melhor leitura
+                    const counts = {};
+                    tray.items.forEach(item => { counts[item] = (counts[item] || 0) + 1; });
+                    
+                    for (const [flavorName, quantity] of Object.entries(counts)) {
+                        message += `  • ${quantity}x ${flavorName}\n`;
+                    }
+                    message += `\n`;
+                }
+            });
+
+            message += `_Pedido montado dinamicamente pelo site._`;
+
+            // Codifica o texto para formato URL e redireciona
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Execução inicial ao carregar a página
+        updateUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dois Cacaus</title>
+    <style>
+        /* ================= VARIÁVEIS E RESET ================= */
+        :root {
+            --bg-color: #F8F5F0;
+            --text-dark: #3E2723;
+            --accent-brown: #5D4037;
+            --card-bg: #EAE3D9;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-dark); padding-top: 100px; min-height: 100vh; }
+        
+        /* ================= NAVEGAÇÃO ================= */
+        header.navbar {
+            position: fixed; width: 100%; top: 0; left: 0; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%; background: rgba(248, 245, 240, 0.95);
+            backdrop-filter: blur(10px); box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-size: 1.8rem; font-weight: bold; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { text-decoration: none; color: inherit; font-weight: 500; }
+        .nav-links a:hover { color: #8D6E63; }
+
+        /* ================= LAYOUT DO CARRINHO ================= */
+        .cart-container {
+            max-width: 1200px; margin: 0 auto; padding: 2rem 5%;
+            display: flex; gap: 2rem; flex-wrap: wrap;
+        }
+        
+        /* Lista de Itens */
+        .cart-items-section { flex: 2; min-width: 320px; }
+        .cart-items-section h1 { margin-bottom: 2rem; font-size: 2rem; }
+        
+        .cart-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: white; padding: 1.5rem; border-radius: 15px;
+            margin-bottom: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        /* Animação de remoção suave */
+        .cart-item.removing { transform: scale(0.9); opacity: 0; }
+
+        .item-details { display: flex; align-items: center; gap: 1.5rem; }
+        .item-details img { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; }
+        .item-info h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+        .item-info p { color: #777; font-size: 0.9rem; }
+
+        /* Controles de Quantidade e Animação */
+        .quantity-control { display: flex; align-items: center; gap: 10px; }
+        .quantity-control button {
+            width: 30px; height: 30px; border-radius: 50%; border: none;
+            background: var(--card-bg); color: var(--text-dark);
+            font-weight: bold; cursor: pointer; transition: var(--transition);
+        }
+        .quantity-control button:hover { background: var(--text-dark); color: white; }
+        
+        .quantity-display {
+            font-size: 1.1rem; font-weight: bold; min-width: 25px; text-align: center;
+            transition: transform 0.1s ease;
+        }
+        /* Classe de animação disparada no clique */
+        .pulse-animation { transform: scale(1.3); color: var(--accent-brown); }
+
+        .item-price { font-size: 1.2rem; font-weight: bold; min-width: 100px; text-align: right; }
+        .remove-btn { background: none; border: none; color: #cc0000; cursor: pointer; font-size: 1.2rem; margin-left: 1rem; }
+
+        /* Resumo do Pedido (Coluna Direita) */
+        .cart-summary {
+            flex: 1; min-width: 300px; background: var(--card-bg);
+            padding: 2rem; border-radius: 20px; height: fit-content;
+        }
+        .cart-summary h2 { margin-bottom: 1.5rem; font-size: 1.5rem; }
+        
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 1.05rem; }
+        .summary-row.total { font-size: 1.3rem; font-weight: bold; border-top: 1px solid #C4B9AC; padding-top: 1rem; margin-top: 1rem; }
+
+        /* Parte de Frete */
+        .shipping-box { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .shipping-box label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: bold; }
+        .shipping-input-group { display: flex; gap: 10px; }
+        .shipping-input-group input {
+            flex: 1; padding: 0.6rem; border: 1px solid #C4B9AC; border-radius: 8px;
+            background: transparent; font-size: 1rem; text-align: center;
+        }
+        .shipping-input-group button {
+            padding: 0.6rem 1rem; background: var(--text-dark); color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+        
+        .checkout-btn {
+            width: 100%; padding: 1rem; background: var(--text-dark); color: white;
+            border: none; border-radius: 10px; font-size: 1.2rem; font-weight: bold;
+            cursor: pointer; transition: var(--transition); margin-top: 1rem;
+        }
+        .checkout-btn:hover { background: var(--accent-brown); transform: translateY(-2px); }
+
+        /* Estado Vazio */
+        .empty-cart-message { text-align: center; padding: 4rem 0; display: none; }
+        .empty-cart-message p { font-size: 1.2rem; margin-bottom: 1.5rem; color: #777; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">🍫 Dois Cacaus</div>
+        <nav class="nav-links">
+            <a href="index.html">Início</a>
+            <a href="comprar.html">Produtos</a>
+            <a href="carrinho.html" style="border-bottom: 2px solid var(--text-dark)">Carrinho</a>
+        </nav>
+    </header>
+
+    <main class="cart-container">
+        <section class="cart-items-section">
+            <h1>Seu Carrinho</h1>
+            <div id="cart-items-list">
+                </div>
+            <div id="empty-message" class="empty-cart-message">
+                <p>Seu carrinho está vazio 🍫</p>
+                <a href="index.html" style="color: var(--accent-brown); font-weight: bold; text-decoration: underline;">Voltar às compras</a>
+            </div>
+        </section>
+
+        <aside class="cart-summary" id="cart-summary-box">
+            <h2>Resumo do Pedido</h2>
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="subtotal-display">R$ 0,00</span>
+            </div>
+            
+            <div class="shipping-box">
+                <label for="cep-input">Calcular Frete</label>
+                <div class="shipping-input-group">
+                    <input type="text" id="cep-input" placeholder="00000-000" maxlength="9">
+                    <button id="btn-calc-shipping">Calcular</button>
+                </div>
+            </div>
+
+            <div class="summary-row">
+                <span>Frete</span>
+                <span id="shipping-display">Digite o CEP</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total</span>
+                <span id="total-display">R$ 0,00</span>
+            </div>
+            <button class="checkout-btn">Finalizar Compra</button>
+        </aside>
+    </main>
+
+    <script>
+        // Simulando dados no localStorage caso o usuário entre direto na página
+        if (!localStorage.getItem('cart') || JSON.parse(localStorage.getItem('cart')).length === 0) {
+            const mockCart = [
+                { id: 1, name: "Combo Trufado Especial", price: 89.90, quantity: 1, image: "https://images.unsplash.com/photo-1542228262-3d663b306a53?q=80&w=200" },
+                { id: 2, name: "Barra de Cacau Artesanal", price: 24.90, quantity: 2, image: "https://images.unsplash.com/photo-1614088921876-068305007328?q=80&w=200" }
+            ];
+            localStorage.setItem('cart', JSON.stringify(mockCart));
+        }
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let shippingCost = 0;
+
+        const itemsListContainer = document.getElementById('cart-items-list');
+        const emptyMessage = document.getElementById('empty-message');
+        const summaryBox = document.getElementById('cart-summary-box');
+        const subtotalDisplay = document.getElementById('subtotal-display');
+        const shippingDisplay = document.getElementById('shipping-display');
+        const totalDisplay = document.getElementById('total-display');
+
+        // Formata moeda
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // Renderiza e atualiza os valores na tela
+        function renderCart() {
+            if (cart.length === 0) {
+                itemsListContainer.innerHTML = '';
+                emptyMessage.style.display = 'block';
+                summaryBox.style.display = 'none';
+                return;
+            }
+
+            emptyMessage.style.display = 'none';
+            summaryBox.style.display = 'block';
+            itemsListContainer.innerHTML = '';
+
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+
+                const itemHTML = `
+                    <div class="cart-item" id="item-${index}">
+                        <div class="item-details">
+                            <img src="${item.image}" alt="${item.name}">
+                            <div class="item-info">
+                                <h3>${item.name}</h3>
+                                <p>Unitário: ${formatCurrency(item.price)}</p>
+                            </div>
+                        </div>
+                        <div class="quantity-control">
+                            <button onclick="changeQuantity(${index}, -1)">-</button>
+                            <span class="quantity-display" id="qty-text-${index}">${item.quantity}</span>
+                            <button onclick="changeQuantity(${index}, 1)">+</button>
+                        </div>
+                        <div class="item-price" id="price-text-${index}">
+                            ${formatCurrency(itemTotal)}
+                        </div>
+                        <button class="remove-btn" onclick="removeItem(${index})">🗑️</button>
+                    </div>
+                `;
+                itemsListContainer.insertAdjacentHTML('beforeend', itemHTML);
+            });
+
+            // Atualiza Resumo
+            subtotalDisplay.innerText = formatCurrency(subtotal);
+            const total = subtotal + shippingCost;
+            totalDisplay.innerText = formatCurrency(total);
+        }
+
+        // Altera quantidade e dispara a animação visual do número pulando
+        window.changeQuantity = function(index, change) {
+            if (cart[index].quantity + change > 0) {
+                cart[index].quantity += change;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                // Dispara renderização e depois aplica o efeito no número específico
+                renderCart();
+                
+                const qtyText = document.getElementById(`qty-text-${index}`);
+                if (qtyText) {
+                    qtyText.classList.add('pulse-animation');
+                    setTimeout(() => qtyText.classList.remove('pulse-animation'), 150);
+                }
+            }
+        };
+
+        // Remove item com animação fade out
+        window.removeItem = function(index) {
+            const itemElement = document.getElementById(`item-${index}`);
+            itemElement.classList.add('removing');
+            
+            setTimeout(() => {
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+            }, 300);
+        };
+
+        // Simulação do cálculo de frete
+        document.getElementById('btn-calc-shipping').addEventListener('click', () => {
+            const cep = document.getElementById('cep-input').value.replace(/\D/g, '');
+            if (cep.length === 8) {
+                // Simula um valor fixo baseado em CEP fictício
+                shippingCost = 15.00; 
+                shippingDisplay.innerText = formatCurrency(shippingCost);
+                renderCart(); // Recalcula o total geral com o frete embutido
+            } else {
+                alert('Por favor, insira um CEP válido com 8 dígitos.');
+            }
+        });
+
+        // Executa ao carregar
+        renderCart();
+    </script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dois Cacaus | A Experiência Pura</title>
+    <style>
+        /* ================= VARIÁVEIS E RESET ================= */
+        :root {
+            --bg-color: #F8F5F0;
+            --text-dark: #3E2723;
+            --accent-brown: #5D4037;
+            --card-bg: #EAE3D9;
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-dark); overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+        
+        /* ================= NAVEGAÇÃO ================= */
+        header.navbar {
+            position: fixed; width: 100%; top: 0; left: 0; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%; background: rgba(248, 245, 240, 0.95);
+            backdrop-filter: blur(10px); box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .logo img {width: 100%; height: 30px; transform: scale(5.5);}
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { font-weight: 500; position: relative; }
+        .nav-links a:hover { color: #8D6E63; }
+        .nav-icons { display: flex; gap: 1rem; align-items: center; font-size: 1.2rem; }
+        .cart-icon-container { position: relative; cursor: pointer; }
+        .cart-badge {
+            position: absolute; top: -8px; right: -8px; background: var(--text-dark);
+            color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem;
+        }
+
+        @keyframes bump {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3) rotate(-10deg); }
+            100% { transform: scale(1); }
+        }
+        .animating-cart { animation: bump 0.4s ease-out; }
+
+        /* ================= HERO (TELA CHEIA) ================= */
+        .hero {
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            background: linear-gradient(to bottom, rgba(248,245,240,0.2), var(--bg-color)), 
+                        url('https://images.unsplash.com/photo-1549007994-cb92caebd54b?q=80&w=2000&auto=format&fit=crop') center/cover;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            position: relative; z-index: 1;
+        }
+        .hero-content {
+            background: rgba(248, 245, 240, 0.85); padding: 3rem;
+            border-radius: 15px; max-width: 600px;
+        }
+        .hero h1 { font-size: 3.5rem; margin-bottom: 1rem; color: var(--text-dark); }
+        .btn {
+            display: inline-block; padding: 1rem 2rem;
+            background-color: var(--text-dark); color: #fff;
+            border-radius: 30px; font-weight: bold; border: none; cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn:hover { background-color: var(--accent-brown); transform: translateY(-3px); }
+
+        /* ================= SEÇÃO DE CATEGORIAS ================= */
+        .categories {
+            padding: 5rem 5%; display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem; position: relative; z-index: 2;
+            opacity: 0; transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .categories.visible { opacity: 1; transform: translateY(0); }
+        
+        .category-card {
+            background-color: var(--card-bg); border-radius: 20px;
+            padding: 2rem; text-align: center; cursor: pointer;
+            transition: var(--transition);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .category-card:hover { transform: scale(1.03); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .category-card h3 { margin-bottom: 1rem; font-size: 1.5rem; }
+        .img-placeholder { width: 100%; height: 200px; background: #D7CCC8; border-radius: 10px; margin-bottom: 1rem; object-fit: cover;}
+
+        /* ================= SHOP THE LOOK ================= */
+        .shop-section { padding: 2rem 5%; display: flex; gap: 4rem; flex-wrap: wrap; margin-bottom: 4rem;}
+        .history { flex: 1; min-width: 300px; }
+        .history h2 { font-size: 2rem; margin-bottom: 1rem; }
+        .products-grid { flex: 2; display: flex; gap: 1rem; min-width: 300px; }
+        .product-item {
+            background: #fff; padding: 1rem; border-radius: 15px;
+            text-align: center; width: 48%; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .add-to-cart-btn {
+            margin-top: 10px; padding: 0.5rem 1rem; background: var(--text-dark);
+            color: #fff; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;
+        }
+        .add-to-cart-btn:hover { background: var(--accent-brown); }
+
+        /* ================= SIDEBAR DO CARRINHO ================= */
+        .cart-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1001;
+            opacity: 0; visibility: hidden; transition: var(--transition);
+        }
+        .cart-overlay.active { opacity: 1; visibility: visible; }
+
+        .cart-sidebar {
+            position: fixed; top: 0; right: -100%; width: 400px; max-width: 100%; height: 100vh;
+            background: var(--bg-color); z-index: 1002; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: right 0.4s ease; display: flex; flex-direction: column;
+        }
+        .cart-sidebar.active { right: 0; }
+
+        .cart-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem; border-bottom: 1px solid #D7CCC8; background: #fff;
+        }
+        .cart-header h2 { font-size: 1.5rem; }
+        .close-cart-btn {
+            background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark);
+        }
+
+        .cart-items-container {
+            flex: 1; overflow-y: auto; padding: 1.5rem;
+        }
+        
+        .cart-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: white; padding: 1rem; border-radius: 10px;
+            margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .cart-item.removing { transform: scale(0.9); opacity: 0; }
+
+        .item-details { display: flex; align-items: center; gap: 1rem; flex: 1; }
+        .item-details img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+        .item-info h3 { font-size: 1rem; margin-bottom: 0.2rem; }
+        .item-info p { color: #777; font-size: 0.8rem; }
+
+        .cart-item-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+        .quantity-control { display: flex; align-items: center; gap: 5px; }
+        .quantity-control button {
+            width: 25px; height: 25px; border-radius: 50%; border: none;
+            background: var(--card-bg); color: var(--text-dark); font-weight: bold; cursor: pointer;
+        }
+        .quantity-control button:hover { background: var(--text-dark); color: white; }
+        .quantity-display { font-size: 0.9rem; font-weight: bold; min-width: 20px; text-align: center; }
+        .pulse-animation { transform: scale(1.3); color: var(--accent-brown); transition: transform 0.1s; }
+
+        .item-price { font-size: 1rem; font-weight: bold; }
+        .remove-btn { background: none; border: none; color: #cc0000; cursor: pointer; font-size: 1rem; }
+
+        .empty-cart-message { text-align: center; padding: 3rem 0; display: none; color: #777; }
+
+        .cart-footer {
+            padding: 1.5rem; background: var(--card-bg); border-top: 1px solid #D7CCC8;
+        }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 1rem; }
+        .summary-row.total { font-size: 1.2rem; font-weight: bold; border-top: 1px solid #C4B9AC; padding-top: 0.5rem; margin-top: 0.5rem; }
+        
+        .checkout-btn {
+            width: 100%; padding: 1rem; background: var(--text-dark); color: white;
+            border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; transition: var(--transition); margin-top: 1rem;
+        }
+        .checkout-btn:hover { background: var(--accent-brown); transform: translateY(-2px); }
+
+        /* ================= RESPONSIVO ================= */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2.5rem; }
+            .hero-content { padding: 1.5rem; width: 90%; }
+            .products-grid { flex-direction: column; }
+            .product-item { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    
+    <header class="navbar">
+        <div class="logo"><img src="Site - Dois Cacaus/imagem/logo.png" alt="Logo"></div>
+        <nav class="nav-links">
+            <a href="#">Início</a>
+            <a href="#">Produtos</a>
+            <a href="#">Nosso Cacau</a>
+            <a href="Site - Dois Cacaus/html/encomendar.html">Comprar</a>
+        </nav>
+        <div class="nav-icons">
+            <span>🔍</span>
+            <span>👤</span>
+            <div class="cart-icon-container" id="cart-icon" onclick="toggleCart()">
+                🛒<span class="cart-badge" id="cart-count">0</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="hero-section">
+        <div class="hero-content">
+            <h1>Gostosura em dobro</h1>
+            <p style="margin-bottom: 2rem;">Descubra sabores intensos e texturas inesquecíveis.</p>
+            <button class="btn" onclick="document.getElementById('categories').scrollIntoView({behavior: 'smooth'})">
+                Conheça Nossos Doces
+            </button>
+        </div>
+    </section>
+
+    <section class="categories" id="categories">
+
+        <a href="Site - Dois Cacaus/html/comprar.html"><div class="category-card">
+            <img src="Site - Dois Cacaus/imagem/brigadeiros/Ninho.png" class="img-placeholder" alt="Barras">
+            <h3>-Ninho-</h3>
+        </div></a>
+
+        <a href="Site - Dois Cacaus/html/comprar.html"><div class="category-card">
+            <img src="Site - Dois Cacaus/imagem/brigadeiros/Ferreiro roche.png" class="img-placeholder" alt="Trufas">
+            <h3>-Ferreiro Roche-</h3>
+        </div></a>
+
+        <a href="Site - Dois Cacaus/html/comprar.html"><div class="category-card">
+            <img src="Site - Dois Cacaus/imagem/brigadeiros/bixo de pe.png" class="img-placeholder" alt="Creme">
+            <h3>-Bixo de pé-</h3>
+        </div></a>
+    </section>
+
+    <section class="shop-section">
+        <div class="products-grid">
+            <div class="product-item">
+                <img src="Site - Dois Cacaus/imagem/brigadeiros/uma bandeja.png" style="width:100%; border-radius:10px;" alt="Combo 1">
+                <h4>-Uma Bandeja-</h4><p>Uma bandeja com 4 brigadeiros, possuindo varíos sabores disponiveis.</p>
+                <p>R$ 10,00</p>
+                <button class="add-to-cart-btn" onclick="adicionarAoCarrinho(1, 'Combo - 4 Brigadeiros', 10.00, 'Site - Dois Cacaus/imagem/brigadeiros/uma bandeja.png')">Adicionar ao Carrinho</button>
+            </div>
+            <div class="product-item">
+                <img src="Site - Dois Cacaus/imagem/brigadeiros/dias dos namorados.png" style="width:100%; border-radius:10px;" alt="Combo 2">
+                <h4>-Especial- Dias dos Namorados-</h4><p>Uma bandeja em formato de coração, com 8 brigadeiros, sabor ferreiro roche, com a opção de pixo pé.</p>
+                <p>R$ 25,00</p>
+                <button class="add-to-cart-btn" onclick="adicionarAoCarrinho(2, 'Especial- Dias de Namorados', 25.00, 'Site - Dois Cacaus/imagem/brigadeiros/dias dos namorados.png')">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+    </section>
+
+    <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+    <aside class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h2>Seu Carrinho</h2>
+            <button class="close-cart-btn" onclick="toggleCart()">✕</button>
+        </div>
+        
+        <div class="cart-items-container" id="cart-items-list">
+            
+            </div>
+        
+        <div id="empty-message" class="empty-cart-message">
+            <p>Seu carrinho está vazio 🍫</p>
+        </div>
+
+        <div class="cart-footer" id="cart-footer">
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="subtotal-display">R$ 0,00</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total</span>
+                <span id="total-display">R$ 0,00</span>
+            </div>
+            <button class="checkout-btn"><a href="Site - Dois Cacaus/html/encomendar.html">Finalizar Compra</a></button>
+        </div>
+    </aside>
+
+    <script>
+        // ================= 1. ANIMAÇÃO DE ROLAGEM =================
+        window.addEventListener('scroll', () => {
+            const scrollPos = window.scrollY;
+            const hero = document.getElementById('hero-section');
+            const categories = document.getElementById('categories');
+            
+            hero.style.opacity = 1 - (scrollPos / 500);
+            hero.style.transform = `translateY(${scrollPos * 0.5}px)`;
+
+            const categoryPosition = categories.getBoundingClientRect().top;
+            const screenPosition = window.innerHeight / 1.3;
+            
+            if (categoryPosition < screenPosition) {
+                categories.classList.add('visible');
+            }
+        });
+
+        // ================= 2. LÓGICA DO CARRINHO =================
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        const cartOverlay = document.getElementById('cart-overlay');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const itemsListContainer = document.getElementById('cart-items-list');
+        const emptyMessage = document.getElementById('empty-message');
+        const cartFooter = document.getElementById('cart-footer');
+        const cartBadge = document.getElementById('cart-count');
+        const cartIcon = document.getElementById('cart-icon');
+
+        // Formata moeda
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // Abre/Fecha Carrinho
+        function toggleCart() {
+            cartSidebar.classList.toggle('active');
+            cartOverlay.classList.toggle('active');
+        }
+
+        // Renderiza itens e atualiza valores
+        function renderCart() {
+            // Atualiza a badge de contagem
+            const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+            cartBadge.innerText = totalItems;
+
+            if (cart.length === 0) {
+                itemsListContainer.innerHTML = '';
+                emptyMessage.style.display = 'block';
+                cartFooter.style.display = 'none';
+                return;
+            }
+
+            emptyMessage.style.display = 'none';
+            cartFooter.style.display = 'block';
+            itemsListContainer.innerHTML = '';
+
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+
+                const itemHTML = `
+                    <div class="cart-item" id="item-${index}">
+                        <div class="item-details">
+                            <img src="${item.image}" alt="${item.name}">
+                            <div class="item-info">
+                                <h3>${item.name}</h3>
+                                <p>${formatCurrency(item.price)}</p>
+                            </div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <button class="remove-btn" onclick="removeItem(${index})">🗑️</button>
+                            <div class="quantity-control">
+                                <button onclick="changeQuantity(${index}, -1)">-</button>
+                                <span class="quantity-display" id="qty-text-${index}">${item.quantity}</span>
+                                <button onclick="changeQuantity(${index}, 1)">+</button>
+                            </div>
+                            <div class="item-price">${formatCurrency(itemTotal)}</div>
+                        </div>
+                    </div>
+                `;
+                itemsListContainer.insertAdjacentHTML('beforeend', itemHTML);
+            });
+
+            document.getElementById('subtotal-display').innerText = formatCurrency(subtotal);
+            document.getElementById('total-display').innerText = formatCurrency(subtotal);
+        }
+
+        // Adiciona um novo item ao carrinho
+        window.adicionarAoCarrinho = function(id, nome, preco, imagem) {
+            let itemExistente = cart.find(item => item.id === id);
+            
+            if (itemExistente) {
+                itemExistente.quantity += 1;
+            } else {
+                cart.push({ id: id, name: nome, price: preco, quantity: 1, image: imagem });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+            
+            // Efeito de "pulo" no ícone do carrinho
+            cartIcon.classList.remove('animating-cart');
+            void cartIcon.offsetWidth; 
+            cartIcon.classList.add('animating-cart');
+
+            // Abre o carrinho automaticamente para o usuário ver (Opcional, pode remover se preferir)
+            if(!cartSidebar.classList.contains('active')) {
+                toggleCart();
+            }
+        };
+
+        // Altera a quantidade (+ e -)
+        window.changeQuantity = function(index, change) {
+            if (cart[index].quantity + change > 0) {
+                cart[index].quantity += change;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                renderCart();
+                
+                // Animação do número
+                const qtyText = document.getElementById(`qty-text-${index}`);
+                if (qtyText) {
+                    qtyText.classList.add('pulse-animation');
+                    setTimeout(() => qtyText.classList.remove('pulse-animation'), 150);
+                }
+            }
+        };
+
+        // Remove do carrinho
+        window.removeItem = function(index) {
+            const itemElement = document.getElementById(`item-${index}`);
+            itemElement.classList.add('removing');
+            
+            setTimeout(() => {
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+            }, 300);
+        };
+
+        // Renderiza no carregamento da página
+        renderCart();
+    </script>
+</body>
+</html>
