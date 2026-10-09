@@ -134,7 +134,7 @@
             
             <div class="price-calculator">
                 <div class="price-row">
-                    <span class="base-price">Preço unitário: R$ 2,50</span>
+                    <span class="base-price">Preço unitário: R$ 3,00</span>
                 </div>
                 <div class="price-row">
                     <div class="quantity-selector">
@@ -142,7 +142,7 @@
                         <input type="number" id="qtd-input" value="1" min="1" readonly>
                         <button id="btn-plus">+</button>
                     </div>
-                    <span class="total-price" id="total-display">R$ 2,50</span>
+                    <span class="total-price" id="total-display">R$ 3,00</span>
                 </div>
                 <button class="buy-btn" onclick="window.location.href='encomendar.html'">Finalizar Bandeja</button>
             </div>
@@ -197,7 +197,7 @@
 
     <script>
         /* --- 1. Lógica do Multiplicador de Preço --- */
-        const basePrice = 2.50;
+        const basePrice = 3.00
         let currentQuantity = 1;
         const qtdInput = document.getElementById('qtd-input');
         const totalDisplay = document.getElementById('total-display');
